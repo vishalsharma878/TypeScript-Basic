@@ -1,10 +1,11 @@
 import {Router} from 'express';
 
 import {Todo} from '../models/todo';
-import { todo } from 'node:test';
-import { message } from 'antd';
 
 const router = Router();
+
+type ResquestBody = { text: string };
+type ResquestParams = { todoId: string }
 
 let todos: Todo[]  = [];
 router.get('/', (req, res, next)=>{
@@ -12,9 +13,10 @@ router.get('/', (req, res, next)=>{
 })
 
 router.post('/todo', (req, res, next) => {
+    const body = req.body as ResquestBody;
     const newTodos: Todo = {
         id: new Date().toISOString(),
-        text: req.body.text
+        text: body.text
     }
 
     todos.push(newTodos);
@@ -22,7 +24,8 @@ router.post('/todo', (req, res, next) => {
 })
 
 router.delete('/delete/:todoId', (req, res, next)=> {
-    const id = req.params.todoId;
+    const params = req.params as ResquestParams;
+    const id = params.todoId;
     const newTodo = todos.filter(item => item.id !== id);
     todos  = newTodo;
     res.status(200).json({message: "Item deleted sucessfully", todos: todos})
@@ -30,10 +33,12 @@ router.delete('/delete/:todoId', (req, res, next)=> {
 })
 
 router.put('/todo/:todoId', (req, res, next) => {
-    const id = req.params.todoId;
+    const params = req.params as ResquestParams;
+    const body = req.body as ResquestBody;
+    const id = params.todoId;
     const todoIndex= todos.findIndex(todoItem => todoItem.id === id);
     if(todoIndex >= 0){
-        todos[todoIndex] = {id: todos[todoIndex].id, text: req.body.text};
+        todos[todoIndex] = {id: todos[todoIndex].id, text: body.text};
         res.status(200).json(todos[todoIndex]);
     }
     else{
